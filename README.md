@@ -8,7 +8,7 @@ A Rust-inspired test framework for Lean4.
 - `@[test_ignore]` for tests to skip by default
 - `@[test_should_error]` for tests expected to fail
 - Assertion helpers: `assertTrue`, `assertEqual`, `assertThrows`, etc.
-- Test runner with filtering and fail-fast options
+- Test runner with filtering, fail-fast, and optional parallel execution
 - Integration with `lake test`
 
 ## Installation
@@ -64,8 +64,15 @@ lake test                     # Run all tests
 lake test -- --filter foo     # Run tests matching "foo"
 lake test -- --ignored        # Include ignored tests
 lake test -- --fail-fast      # Stop on first failure
+lake test -- -j 4             # Short form for concurrent execution
+lake test -- --jobs 4         # Run up to 4 tests concurrently
 lake test -- --help           # Show help
 ```
+
+Parallel execution is opt-in. Tests run sequentially by default, and tests enabled via
+`--jobs` should avoid unsynchronized shared mutable state. LeanTest does not yet provide a
+per-test `serial` marker, so suites with serialization constraints should run with `--jobs 1`
+or move those tests into a separate test driver.
 
 ## Assertions
 

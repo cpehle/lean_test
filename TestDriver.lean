@@ -10,6 +10,14 @@ tests marked with @[test] in the imported modules.
 
 import LeanTest
 import Lean.Util.Path
+import Test.Basic
+
+/-- Parse a positive integer for `--jobs`. -/
+def parseJobs (value : String) : IO Nat := do
+  match value.toNat? with
+  | some (Nat.succ n) => pure (Nat.succ n)
+  | some 0 => throw <| IO.userError "--jobs must be greater than 0"
+  | none => throw <| IO.userError s!"invalid value for --jobs: {value}"
 
 /-- Parse command line arguments into a RunConfig. -/
 def parseArgs (args : List String) : IO LeanTest.RunConfig := do
@@ -17,6 +25,8 @@ def parseArgs (args : List String) : IO LeanTest.RunConfig := do
   let mut remaining := args
   while _h : !remaining.isEmpty do
     match remaining with
+    | "--filter" :: [] =>
+      throw <| IO.userError "--filter requires a pattern"
     | "--filter" :: pattern :: rest =>
       config := { config with filter := some pattern }
       remaining := rest
@@ -26,6 +36,16 @@ def parseArgs (args : List String) : IO LeanTest.RunConfig := do
     | "--fail-fast" :: rest =>
       config := { config with failFast := true }
       remaining := rest
+    | "--jobs" :: [] =>
+      throw <| IO.userError "--jobs requires a positive integer"
+    | "--jobs" :: value :: rest =>
+      config := { config with jobs := ← parseJobs value }
+      remaining := rest
+    | "-j" :: [] =>
+      throw <| IO.userError "-j requires a positive integer"
+    | "-j" :: value :: rest =>
+      config := { config with jobs := ← parseJobs value }
+      remaining := rest
     | "--help" :: _ =>
       IO.println "Usage: lake test [OPTIONS]"
       IO.println ""
@@ -33,6 +53,7 @@ def parseArgs (args : List String) : IO LeanTest.RunConfig := do
       IO.println "  --filter PATTERN  Only run tests matching PATTERN"
       IO.println "  --ignored         Include tests marked as ignored"
       IO.println "  --fail-fast       Stop on first failure"
+      IO.println "  --jobs, -j N      Run up to N tests concurrently"
       IO.println "  --help            Show this help"
       IO.Process.exit 0
     | _ :: rest =>

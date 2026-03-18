@@ -84,7 +84,17 @@ def testListOperations : IO Unit := do
 def testSlowOperation : IO Unit := do
   -- This test is skipped by default
   -- Run with `lake test -- --ignored` to include it
-  IO.sleep 1000
+  IO.sleep 250
+  LeanTest.assertTrue true
+
+@[test_ignore]
+def testSlowOperationTwo : IO Unit := do
+  IO.sleep 250
+  LeanTest.assertTrue true
+
+@[test_ignore]
+def testSlowOperationThree : IO Unit := do
+  IO.sleep 250
   LeanTest.assertTrue true
 
 /-! ## Expected Error Test -/
