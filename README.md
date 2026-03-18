@@ -106,6 +106,35 @@ LeanTest/
 └── TestDriver.lean         # Test driver executable
 ```
 
+## Commit Template
+
+This repo uses scoped conventional commit subjects:
+
+```text
+type(scope): summary
+```
+
+A commit message template is included at [.gitmessage](/Users/pehle/dev/lean-test/.gitmessage). Enable it locally:
+
+```bash
+./scripts/setup-git-hooks.sh
+```
+
+This sets:
+- `commit.template=.gitmessage`
+- `core.hooksPath=.githooks`
+
+Included hooks:
+- `pre-commit`: fails on staged whitespace errors and conflict markers
+- `commit-msg`: enforces `type(scope): summary`
+- `pre-push`: validates pushed commit subjects with `scripts/check-commit-messages.sh`
+
+Manual check example:
+
+```bash
+./scripts/check-commit-messages.sh HEAD~20..HEAD
+```
+
 ## License
 
 Apache 2.0

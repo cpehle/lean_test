@@ -1,0 +1,19 @@
+# <type>(<scope>): <short summary>
+#
+# Required format:
+#   type(scope): summary
+#
+# Common types:
+#   feat, fix, chore, ci, build, docs, refactor, test, perf
+#
+# Scope examples:
+#   runner, driver, attrs, assert, readme, git, ci
+#
+# Body (optional):
+# - Why this change is needed
+# - Key implementation notes
+# - Follow-ups or limitations
+#
+# Footer (optional):
+# Refs: #<issue>
+# BREAKING CHANGE: <migration note>
