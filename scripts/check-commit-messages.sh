@@ -39,11 +39,35 @@ resolve_range() {
       echo "${before}..${sha}"
       return 0
     fi
-    echo "${sha}~20..${sha}"
+    if git rev-parse --verify "origin/main" >/dev/null 2>&1; then
+      echo "origin/main...${sha}"
+      return 0
+    fi
+    if git rev-parse --verify "${sha}~20" >/dev/null 2>&1; then
+      echo "${sha}~20..${sha}"
+    else
+      echo "${sha}"
+    fi
     return 0
   fi
 
-  echo "HEAD~20..HEAD"
+  local upstream=""
+  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
+  if [[ -n "${upstream}" ]]; then
+    echo "${upstream}..HEAD"
+    return 0
+  fi
+
+  if git rev-parse --verify "origin/main" >/dev/null 2>&1; then
+    echo "origin/main...HEAD"
+    return 0
+  fi
+
+  if git rev-parse --verify "HEAD~20" >/dev/null 2>&1; then
+    echo "HEAD~20..HEAD"
+  else
+    echo "HEAD"
+  fi
 }
 
 range="$(resolve_range "$@")"

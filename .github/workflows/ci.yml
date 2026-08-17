@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          test: true
+
+      - name: Run ignored tests with bounded parallelism
+        run: lake test -- --ignored --jobs 4
+
+      - name: Verify unknown options fail
+        run: |
+          if lake test -- --definitely-unknown; then
+            echo "unknown test-runner option unexpectedly succeeded" >&2
+            exit 1
+          fi
+
+      - name: Check commit subjects
+        if: runner.os == 'Linux'
+        run: ./scripts/check-commit-messages.sh
+
+      - name: Check repository hygiene
+        run: |
+          test -s LICENSE
+          git diff --check
