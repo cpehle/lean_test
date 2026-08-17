@@ -56,10 +56,16 @@ def assertNone [ToString α] (opt : Option α) (msg : Option String := none) : I
 
 /-- Assert that an action throws an error. -/
 def assertThrows (action : IO α) (msgPattern : Option String := none) : IO Unit := do
-  try
-    let _ ← action
+  let error? : Option IO.Error ←
+    try
+      let _ ← action
+      pure none
+    catch e =>
+      pure (some e)
+  match error? with
+  | none =>
     throw <| IO.userError "Assertion failed: expected exception but none was thrown"
-  catch e =>
+  | some e =>
     if let some pattern := msgPattern then
       let errMsg := toString e
       unless errMsg.containsSubstr pattern do

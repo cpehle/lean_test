@@ -112,4 +112,44 @@ def testDivisionByZero : IO Unit := do
   let _ := x / y
   pure ()
 
+/-! ## Assertion Helper Regression Tests -/
+
+@[test]
+def testAssertThrowsAcceptsThrownError : IO Unit := do
+  LeanTest.assertThrows
+    (throw <| IO.userError "expected sentinel" : IO Unit)
+    (some "expected sentinel")
+
+@[test]
+def testAssertThrowsRejectsSuccessfulAction : IO Unit := do
+  let rejected ←
+    try
+      LeanTest.assertThrows (pure ())
+      pure false
+    catch _ =>
+      pure true
+  LeanTest.assertTrue rejected
+
+@[test]
+def testAssertThrowsRejectsPatternMismatch : IO Unit := do
+  let rejected ←
+    try
+      LeanTest.assertThrows
+        (throw <| IO.userError "actual sentinel" : IO Unit)
+        (some "different sentinel")
+      pure false
+    catch _ =>
+      pure true
+  LeanTest.assertTrue rejected
+
+/-! ## Attribute Validation Regression Tests -/
+
+@[test]
+def testAttributeRequiresIOUnit : IO Unit := do
+  let ioUnit := Lean.mkApp (Lean.mkConst ``IO [.zero]) (Lean.mkConst ``Unit)
+  let ioNat := Lean.mkApp (Lean.mkConst ``IO [.zero]) (Lean.mkConst ``Nat)
+  LeanTest.assertTrue (LeanTest.isValidTestType ioUnit)
+  LeanTest.assertFalse (LeanTest.isValidTestType ioNat)
+  LeanTest.assertFalse (LeanTest.isValidTestType (Lean.mkConst ``Nat))
+
 end Test.Basic

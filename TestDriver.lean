@@ -56,8 +56,8 @@ def parseArgs (args : List String) : IO LeanTest.RunConfig := do
       IO.println "  --jobs, -j N      Run up to N tests concurrently"
       IO.println "  --help            Show this help"
       IO.Process.exit 0
-    | _ :: rest =>
-      remaining := rest
+    | arg :: _ =>
+      throw <| IO.userError s!"unknown option: {arg}"
     | [] => remaining := []
   return config
 

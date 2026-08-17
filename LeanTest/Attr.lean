@@ -18,12 +18,19 @@ namespace LeanTest
 
 open Lean
 
-/-- Validate that a declaration has the correct type for a test (IO Unit). -/
+/-- Return true exactly when a declaration type is `IO Unit`. -/
+def isValidTestType (type : Expr) : Bool :=
+  if type.isAppOfArity ``IO 1 then
+    type.appArg!.isConstOf ``Unit
+  else
+    false
+
+/-- Validate that a declaration has the correct type for a test (`IO Unit`). -/
 def validateTestType (env : Environment) (declName : Name) : AttrM Unit := do
   let some info := env.find? declName
     | throwError "unknown declaration '{declName}'"
   let type := info.type
-  unless type.isAppOf ``IO do
+  unless isValidTestType type do
     throwError "@[test] function must have type 'IO Unit', got {type}"
 
 /-- The @[test] attribute marks a function as a test.
