@@ -57,6 +57,7 @@ Add to your `lakefile.lean`:
 @[test_driver]
 lean_exe test where
   root := `TestDriver
+  supportInterpreter := true
 ```
 
 ### Running Tests

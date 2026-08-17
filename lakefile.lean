@@ -17,3 +17,4 @@ lean_lib LeanTestExamples where
 @[test_driver]
 lean_exe test where
   root := `TestDriver
+  supportInterpreter := true
