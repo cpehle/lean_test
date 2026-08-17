@@ -1,5 +1,7 @@
 # LeanTest
 
+[![CI](https://github.com/cpehle/lean_test/actions/workflows/ci.yml/badge.svg)](https://github.com/cpehle/lean_test/actions/workflows/ci.yml)
+
 A Rust-inspired test framework for Lean4.
 
 ## Features
@@ -16,7 +18,7 @@ A Rust-inspired test framework for Lean4.
 Add to your `lakefile.lean`:
 
 ```lean
-require LeanTest from git "https://github.com/..." @ "main"
+require LeanTest from git "https://github.com/cpehle/lean_test.git" @ "main"
 ```
 
 ## Usage
@@ -74,6 +76,10 @@ Parallel execution is opt-in. Tests run sequentially by default, and tests enabl
 per-test `serial` marker, so suites with serialization constraints should run with `--jobs 1`
 or move those tests into a separate test driver.
 
+CI runs the build and test suite on Ubuntu and macOS. It also exercises ignored tests in
+parallel, checks CLI error handling, validates commit subjects, and checks the diff for
+whitespace errors.
+
 ## Assertions
 
 | Function | Description |
@@ -114,7 +120,7 @@ This repo uses scoped conventional commit subjects:
 type(scope): summary
 ```
 
-A commit message template is included at [.gitmessage](/Users/pehle/dev/lean-test/.gitmessage). Enable it locally:
+A commit message template is included at [.gitmessage](.gitmessage). Enable it locally:
 
 ```bash
 ./scripts/setup-git-hooks.sh
@@ -132,9 +138,19 @@ Included hooks:
 Manual check example:
 
 ```bash
-./scripts/check-commit-messages.sh HEAD~20..HEAD
+./scripts/check-commit-messages.sh
 ```
+
+With no explicit range, the checker validates commits ahead of the configured upstream branch.
+Pass a revision range when auditing a different part of history.
+
+## Releasing
+
+The package version is declared in `lakefile.lean`. After the release commit passes CI, create
+and push an annotated tag with the matching version, for example `v0.1.0`. The release workflow
+re-runs the build and extended test suite, verifies that the tag matches the package version,
+and creates the corresponding GitHub source release.
 
 ## License
 
-Apache 2.0
+[Apache License 2.0](LICENSE)
